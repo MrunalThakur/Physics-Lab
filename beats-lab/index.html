@@ -379,17 +379,9 @@
             let sliceWidth = canvas.width / dataArray.length;
             let x = 0;
 
-            let bestStartIndex = 0;
-            for (let i = 1; i < dataArray.length; i++) {
-                if (dataArray[i - 1] < 128 && dataArray[i] >= 128) {
-                    bestStartIndex = i; // Find the first zero-crossing upwards
-                    break;
-                }
-            }
             for (let i = 0; i < dataArray.length; i++) {
                 // Normalize, clamp, and apply gain
-                let index = (bestStartIndex + i) % dataArray.length; 
-                let v = ((dataArray[index] - 128) / 128.0);    
+                let v = ((dataArray[i] - 128) / 128.0);    
                 v = v * (canvas.height / 2);
                 v = Math.max(-canvas.height / 2, Math.min(v, canvas.height / 2));
                 v = v * gain;                              
