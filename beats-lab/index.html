@@ -351,92 +351,84 @@
         }
 
         function drawWaveform() {
-            if (!isListening || isFrozen) return;
-            requestAnimationFrame(drawWaveform);
+    if (!isListening || isFrozen) return;
+    requestAnimationFrame(drawWaveform);
 
-            analyser.getByteTimeDomainData(dataArray);
+    analyser.getByteTimeDomainData(dataArray);
 
-            canvasCtx.fillStyle = "#000";
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+    canvasCtx.fillStyle = "#000";
+    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw grid and axes (same as before)
-            drawGridAndAxes();
+    // Draw grid and axes (same as before)
+    drawGridAndAxes();
 
-            // Draw waveform as a fine line
-            canvasCtx.lineWidth = 1;
-            canvasCtx.strokeStyle = "#00ff00";
-            canvasCtx.beginPath();
+    // Draw waveform as a fine line
+    canvasCtx.lineWidth = 1;
+    canvasCtx.strokeStyle = "#00ff00";
+    canvasCtx.beginPath();
 
-            let sliceWidth = canvas.width / dataArray.length;
-            let x = 0;
+    let sliceWidth = canvas.width / dataArray.length;
+    let x = 0;
 
-            let bestStartIndex = 0;
-            for (let i = 1; i < dataArray.length; i++) {
-                if (dataArray[i - 1] < 128 && dataArray[i] >= 128) {
-                    bestStartIndex = i; // Find the first zero-crossing upwards
-                    break;
-                }
-            }
-            for (let i = 0; i < dataArray.length; i++) {
-                // Normalize, clamp, and apply gain
-                let index = (bestStartIndex + i) % dataArray.length; 
-                let v = ((dataArray[index] - 128) / 128.0);    
-                v = v * (canvas.height / 2);
-                v = Math.max(-canvas.height / 2, Math.min(v, canvas.height / 2));
-                v = v * gain;                              
-                let y = canvas.height / 2 + v;              
+    for (let i = 0; i < dataArray.length; i++) {
+        // Normalize, clamp, and apply gain
+        let v = ((dataArray[i] - 128) / 128.0);    
+        v = v * (canvas.height / 2);
+        v = Math.max(-canvas.height / 2, Math.min(v, canvas.height / 2));
+        v = v * gain;                              
+        let y = canvas.height / 2 + v;              
 
-                if (i === 0) {
-                    canvasCtx.moveTo(x, y);
-                } else {
-                    canvasCtx.lineTo(x, y);
-                }
-                x += sliceWidth;
-            }
-
-            canvasCtx.stroke();
+        if (i === 0) {
+            canvasCtx.moveTo(x, y);
+        } else {
+            canvasCtx.lineTo(x, y);
         }
+        x += sliceWidth;
+    }
+
+    canvasCtx.stroke();
+}
 
 
         function generateTone(frequency) {
           if (isTonePlaying) return;
 
-            osc = audioContext.createOscillator();
-            gainNode = audioContext.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(analyser); 
-            gainNode.connect(audioContext.destination);
+    osc = audioContext.createOscillator();
+    gainNode = audioContext.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(analyser); 
+    gainNode.connect(audioContext.destination);
 
-            osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            osc.type = "sine";
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-            osc.start();
-            isTonePlaying = true;
+    osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    osc.type = "sine";
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    osc.start();
+    isTonePlaying = true;
 
-            document.getElementById("toneBtn").textContent = "Stop Tone";
-            document.getElementById("toneBtn").classList.remove("btn-tone");
-            document.getElementById("toneBtn").classList.add("btn-stop");
-                }
-
-        function generateTone2(frequency) {
-            if (isTone2Playing) return;
-
-            osc2 = audioContext.createOscillator();
-            gainNode2 = audioContext.createGain();
-            osc2.connect(gainNode2);
-            gainNode2.connect(analyser);
-            gainNode2.connect(audioContext.destination);
-
-            osc2.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            osc2.type = "sine";
-            gainNode2.gain.setValueAtTime(0.5, audioContext.currentTime);
-            osc2.start();
-            isTone2Playing = true;
-
-            document.getElementById("toneBtn2").textContent = "Stop Tone 2";
-            document.getElementById("toneBtn2").classList.remove("btn-tone");
-            document.getElementById("toneBtn2").classList.add("btn-stop");
+    document.getElementById("toneBtn").textContent = "Stop Tone";
+    document.getElementById("toneBtn").classList.remove("btn-tone");
+    document.getElementById("toneBtn").classList.add("btn-stop");
         }
+
+	function generateTone2(frequency) {
+	    if (isTone2Playing) return;
+
+    osc2 = audioContext.createOscillator();
+    gainNode2 = audioContext.createGain();
+    osc2.connect(gainNode2);
+    gainNode2.connect(analyser);
+    gainNode2.connect(audioContext.destination);
+
+    osc2.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    osc2.type = "sine";
+    gainNode2.gain.setValueAtTime(0.5, audioContext.currentTime);
+    osc2.start();
+    isTone2Playing = true;
+
+    document.getElementById("toneBtn2").textContent = "Stop Tone 2";
+    document.getElementById("toneBtn2").classList.remove("btn-tone");
+    document.getElementById("toneBtn2").classList.add("btn-stop");
+	}
 
         function stopTone() {
             if (!isTonePlaying) {
@@ -451,16 +443,16 @@
             document.getElementById("toneBtn").classList.remove("btn-stop");
             document.getElementById("toneBtn").classList.add("btn-tone");
         }
-        function stopTone2() {
-            if (!isTone2Playing) return;
-        
-            osc2.stop();
-            isTone2Playing = false;
-        
-            document.getElementById("toneBtn2").textContent = "Generate Tone 2";
-            document.getElementById("toneBtn2").classList.remove("btn-stop");
-            document.getElementById("toneBtn2").classList.add("btn-tone");
-        }
+	function stopTone2() {
+	    if (!isTone2Playing) return;
+	
+	    osc2.stop();
+	    isTone2Playing = false;
+	
+	    document.getElementById("toneBtn2").textContent = "Generate Tone 2";
+	    document.getElementById("toneBtn2").classList.remove("btn-stop");
+	    document.getElementById("toneBtn2").classList.add("btn-tone");
+	}
 
     </script>
 	<div class="special-message">Crafted with love by Mrunal Thakur for my mom, the best physics teacher!</div>
